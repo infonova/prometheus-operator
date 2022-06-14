@@ -315,6 +315,10 @@ type PrometheusSpec struct {
 	// notes to ensure that no incompatible AlertManager configs are going to break
 	// Prometheus after the upgrade.
 	AdditionalAlertManagerConfigs *v1.SecretKeySelector `json:"additionalAlertManagerConfigs,omitempty"`
+	// AdditionalArgs allows setting additional arguments for the Prometheus container.
+	// It is intended for e.g. activating hidden flags which are not supported by
+	// the dedicated configuration options yet.
+	AdditionalArgs []string `json:"additionalArgs,omitempty"`
 	// APIServerConfig allows specifying a host and auth methods to access apiserver.
 	// If left empty, Prometheus is assumed to run inside of the cluster
 	// and will discover API servers automatically and use the pod's CA certificate
