@@ -462,14 +462,14 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *operator.Config, shard in
 		}
 	}
 
+	for i, a := range promArgs {
+		promArgs[i] = "-" + a
+	}
+
 	if len(p.Spec.AdditionalArgs) > 0 {
 		for _, a := range p.Spec.AdditionalArgs {
 			promArgs = append(promArgs, a)
 		}
-	}
-
-	for i, a := range promArgs {
-		promArgs[i] = "-" + a
 	}
 
 	volumes := []v1.Volume{
