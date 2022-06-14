@@ -105,6 +105,14 @@ spec:
                 required:
                 - key
                 type: object
+              additionalArgs:
+                description: AdditionalArgs allows setting additional arguments for
+                  the Prometheus container. It is intended for e.g. activating hidden
+                  flags which are not supported by the dedicated configuration options
+                  yet.
+                items:
+                  type: string
+                type: array
               additionalScrapeConfigs:
                 description: 'AdditionalScrapeConfigs allows specifying a key of a
                   Secret containing additional Prometheus scrape configurations. Scrape

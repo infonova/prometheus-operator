@@ -1323,6 +1323,11 @@ func (in *PrometheusSpec) DeepCopyInto(out *PrometheusSpec) {
 		*out = new(corev1.SecretKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.AdditionalArgs != nil {
+		in, out := &in.AdditionalArgs, &out.AdditionalArgs
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.APIServerConfig != nil {
 		in, out := &in.APIServerConfig, &out.APIServerConfig
 		*out = new(APIServerConfig)
