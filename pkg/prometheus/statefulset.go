@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/prometheus-operator/prometheus-operator/pkg/webconfig"
@@ -65,6 +66,7 @@ var (
 	shardLabelName                = "operator.prometheus.io/shard"
 	prometheusNameLabelName       = "operator.prometheus.io/name"
 	probeTimeoutSeconds     int32 = 3
+	argKeyRegex                   = regexp.MustCompile("^--(?:([a-z\\.\\-]+)(?:=.+)?)$")
 )
 
 func expectedStatefulSetShardNames(
@@ -467,6 +469,9 @@ func makeStatefulSetSpec(p monitoringv1.Prometheus, c *operator.Config, shard in
 	}
 
 	if len(p.Spec.AdditionalArgs) > 0 {
+		if err := verifyAdditionalArgs(promArgs, p.Spec.AdditionalArgs); err != nil {
+			return nil, err
+		}
 		for _, a := range p.Spec.AdditionalArgs {
 			promArgs = append(promArgs, a)
 		}
@@ -946,4 +951,40 @@ func subPathForStorage(s *monitoringv1.StorageSpec) string {
 	}
 
 	return "prometheus-db"
+}
+
+func intersection(a, b []string) (i []string) {
+	m := make(map[string]bool)
+
+	for _, item := range a {
+		m[item] = true
+	}
+
+	for _, item := range b {
+		if _, ok := m[item]; ok {
+			i = append(i, item)
+		}
+	}
+	return i
+}
+
+func extractArgKeys(args []string) (k []string) {
+	for _, arg := range args {
+		key := argKeyRegex.FindStringSubmatch(arg)[1]
+		k = append(k, key)
+	}
+
+	return k
+}
+
+func verifyAdditionalArgs(promArgs []string, additionalArgs []string) (e error) {
+	promArgKeys := extractArgKeys(promArgs)
+	additionalArgKeys := extractArgKeys(additionalArgs)
+
+	i := intersection(promArgKeys, additionalArgKeys)
+	if len(i) > 0 {
+		return errors.Errorf("invalid additionalArgs configuration for already defined args: %s", i)
+	}
+
+	return nil
 }
